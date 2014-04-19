@@ -33,7 +33,7 @@ import MySQLdb, cgi, sys, getopt, subprocess, os.path
 # Adds a user to the webwork database.
 # Edits the [course_name]_user, [course_name]_password, and [course_name]_permissions tables.
 # Returns 0 on failure and 1 on success.
-def addUser(course_name, user_id, first_name, last_name, email_address, student_id, section, recitation, comment, password, permission):
+def addUser(course_name, user_id, first_name, last_name, email_address, student_id, status, section, recitation, comment, password, permission):
 	# Attempt to make connection to the webwork database.
 	# Exits function returning 0 if failure.
 	try:
@@ -43,7 +43,7 @@ def addUser(course_name, user_id, first_name, last_name, email_address, student_
 		print "ERROR: Could not connect to webwork database."
 		return 0;
 
-	userTableSQL = "INSERT INTO " + course_name + "_user(user_id, first_name, last_name, email_address, student_id, section, recitation, comment) VALUES (" + user_id + ", " + first_name + ", " + last_name +", " + email_address +", " + student_id + ", " + section + ", " + recitation + ", " + comment + ")"
+	userTableSQL = "INSERT INTO " + course_name + "_user(user_id, first_name, last_name, email_address, student_id, status, section, recitation, comment) VALUES (" + user_id + ", " + first_name + ", " + last_name + ", " + email_address + ", " + student_id + ", " + status + ", " + section + ", " + recitation + ", " + comment + ")"
 	passwordTableSQL = "INSERT INTO " + course_name + "_password(user_id, password) VALUES (" + user_id + ", " + password + ")"
 	permissionTableSQL = "INSERT INTO " + course_name + "_permission(user_id, permission) VALUES (" + user_id + ", " + permission + ")"
 
@@ -79,6 +79,7 @@ first_name = "NULL"
 last_name = "NULL"
 email = "NULL"
 section = "NULL"
+status = "\"C\""
 recitation = "NULL"
 comment = "NULL"
 permission = "\"0\""
@@ -110,7 +111,7 @@ elif len(sys.argv) > 1:
 	try:
 		opts, args = getopt.getopt(sys.argv[1:],"c:f:e:l:m:p:r:s:t:u:",["comment=","course=","email=","first_name=","last_name=","password=", "permission=","recitation=","section=","student=","user="])
 	except getopt.GetoptError:
-		print 'AddUser.py -c|--course= <course> -u|--user= <user_id> -s|--student= <student_id> [-p|--password= <password>] [-e|--email= <email_address>] [-f|--first_name= <first_name>] [-l|--last_name <last_name>] [-m|--permission= <permission_#>] [-t|--section= <section_#>] [-r|--recitation= <recitation_#>] [--comment= "<comment>"]'
+		print 'AddUser.py -c|--course= <course> -u|--user= <user_id> -s|--student= <student_id> [-p|--password= <password>] [-e|--email= <email_address>] [-f|--first_name= <first_name>] [-l|--last_name <last_name>] [-m|--permission= <permission_#>] [-t|--section= <section_#>] [-r|--recitation= <recitation_#>] [--comment= "<comment>"] [--status= <status>]'
 		sys.exit()
 
 	for opt, arg in opts:
@@ -136,11 +137,13 @@ elif len(sys.argv) > 1:
 			section = "\"" + arg + "\""
 		elif opt == "--comment":
 			comment = "\"" + arg + "\""
+		elif opt == "--status":
+			status = "\"" + arg + "\""
 
 	# If mandatory options are not specified, print error message
 	if course is None or user_id is None or student_id is None:
 		print 'ERROR: course, student, & user are required options'
-		print 'AddUser.py -c|--course= <course> -u|--user= <user_id> -s|--student= <student_id> [-p|--password= <password>] [-e|--email= <email_address>] [-f|--first_name= <first_name>] [-l|--last_name <last_name>] [-m|--permission= <permission_#>] [-t|--section= <section_#>] [-r|--recitation= <recitation_#>] [--comment= "<comment>"]'
+		print 'AddUser.py -c|--course= <course> -u|--user= <user_id> -s|--student= <student_id> [-p|--password= <password>] [-e|--email= <email_address>] [-f|--first_name= <first_name>] [-l|--last_name <last_name>] [-m|--permission= <permission_#>] [-t|--section= <section_#>] [-r|--recitation= <recitation_#>] [--comment= "<comment>"] [--status= <status>]'
 		sys.exit()
 
 # If manatory variables are not changes from NULL value, throw error & exit
@@ -157,4 +160,4 @@ if password is None:
 if os.path.isfile('./webworkCrypt.pl'):
 	password = "\"" + subprocess.check_output("perl ./webworkCrypt.pl " + password, shell=True) + "\""
 
-addUser(course, user_id, first_name, last_name, email, student_id, section, recitation, comment, password, permission)
+addUser(course, user_id, first_name, last_name, email, student_id, status, section, recitation, comment, password, permission)
