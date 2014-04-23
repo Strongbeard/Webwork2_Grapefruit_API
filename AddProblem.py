@@ -18,7 +18,6 @@ import MySQLdb, sys, os, shutil, pwd, argparse, gzip
 #                 problemSet problemPath problemName problemId
 # AUTHORS:
 #   Kevin L. Mahon
-#   Kate Spinney
 
 ###############################   MAIN   ######################################
 
@@ -74,7 +73,7 @@ if( not os.path.isfile(args.problemPath) ):
 	sys.exit()
 
 
-##### ADDING THE PROBLEM ####
+##### ADDING THE PROBLEM #####
 
 # File added to the problem set directory will always have .pg on the end
 if( not args.problemName.split(".")[-1] == "pg" ):
@@ -96,3 +95,6 @@ except MySQLdb.Error, error:
 	except IndexError:
 		print "MySQL Error: %s" % str(error)
 	db.rollback()
+
+# Close the database connection
+db.close()
